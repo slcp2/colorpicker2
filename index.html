@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iro.js 颜色选择器</title>
+    <!-- iro.js CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/@jaames/iro@5.5.2/dist/iro.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        #color-picker {
+            margin: 0 auto 20px;
+        }
+        .color-info {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #f0f0f0;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>iro.js 颜色选择器</h1>
+        <div id="color-picker"></div>
+        <div class="color-info">
+            <p>所选颜色: <span id="color-value">#000000</span></p>
+            <p>RGB: <span id="rgb-value">rgb(0, 0, 0)</span></p>
+            <p>HSL: <span id="hsl-value">hsl(0, 0%, 0%)</span></p>
+        </div>
+        <button id="nfc-write">NFC에 쓰기</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5.5.2/dist/iro.min.js"></script>
+    <script>
+        // 1️⃣ 컬러피커 생성
+        const colorPicker = new iro.ColorPicker('#color-picker', {
+            width: 250,
+            color: "#ff0000",
+            borderWidth: 1,
+            borderColor: "#ddd",
+        });
+
+        // 2️⃣ 컬러 값 실시간 업데이트
+        colorPicker.on('color:change', function(color) {
+            document.getElementById('color-value').textContent = color.hexString;
+            document.getElementById('rgb-value').textContent = color.rgbString;
+            document.getElementById('hsl-value').textContent = color.hslString;
+        });
+
+        // 3️⃣ NFC에 데이터 쓰기 함수
+        async function writeToNFC() {
+            const colorCode = document.getElementById('color-value').textContent;
+
+            if ('NDEFWriter' in window) {
+                try {
+                    const ndef = new NDEFWriter();
+                    console.log("⏳ NFC 준비 중... 태그에 스마트폰을 가까이 대세요.");
+                    alert("⏳ NFC 준비 중... 태그에 스마트폰을 가까이 대세요.");
+
+                    await ndef.write(colorCode);
+                    alert(`✅ NFC 태그에 ${colorCode} 값이 기록되었습니다!`);
+                } catch (error) {
+                    console.error("❌ NFC 쓰기 실패:", error);
+                    alert("❌ NFC 쓰기 실패. 다시 시도해주세요.");
+                }
+            } else {
+                alert("❌ Web NFC가 지원되지 않는 기기입니다.");
+            }
+        }
+
+        // 4️⃣ 버튼 클릭 시 NFC 쓰기 실행
+        document.getElementById('nfc-write').addEventListener('click', writeToNFC);
+    </script>
+</body>
+</html>
